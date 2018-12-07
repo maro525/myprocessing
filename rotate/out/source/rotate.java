@@ -26,7 +26,7 @@ public void setup()
     px = width/2;
     py = height/2;
 
-    strokeWeight(3.0f);
+    strokeWeight(2.0f);
 }
 
 float b = 0.0f;
