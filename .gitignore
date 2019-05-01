@@ -1,4 +1,6 @@
 *.mov
+.vscode/
+out/
 *.mp4
 *.png
 *.jpg
