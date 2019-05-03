@@ -55,10 +55,10 @@ void draw() {
 ////////
 
 int samplesPerFrame = 5;
-int numFrames = 200;
+int numFrames = 100;
 float shutterAngle = 1.0;
 
-boolean bRecord = false;
+boolean bRecord = true;
 
 OpenSimplexNoise noise;
 
@@ -74,9 +74,9 @@ class Point {
     Point(int i_) {
         index = i_;
 
-        int space = width / (m_+2);
-        dx = space + (index % m_) * space;
-        dy = space + (index / m_) * space;
+        float space = width / (float)(m_+1);
+        dx = space + (float)(index % m_) * space;
+        dy = space + (float)(index / m_) * space;
 
         x = dx; y = dy;
     }
@@ -89,6 +89,19 @@ class Point {
     void setPos(float x_, float y_) {
         x = x_;
         y = y_;
+    }
+
+    void setPosByLerp(float ph_) {
+        float ph;
+        if(ph_<0.5) {
+            ph = ease(ph_*2, 4.0);
+            x = lerp(dx, px, ph);
+            y = lerp(dy, py, ph);
+        } else {
+            ph = ease((ph_-0.5)*2, 4.0);
+            x = lerp(px, dx, ph);
+            y = lerp(py, dy, ph);
+        }
     }
 
     void setSize(float _s) {
@@ -120,6 +133,10 @@ class Point {
         size = random(2,4);  
     }
 
+    void setNextPos() {
+        setDistinationFromPrevious(px, py);
+    }
+
     void show() {
         stroke(255);
         fill(255);
@@ -137,17 +154,11 @@ class Things {
 
         float x = x0;
         float y = y0;
-        Point p = new Point(0);
-        // p.setPos(x, y);
-        // p.setSize(0.0);
-        // points.add(p);
 
         for(int i=0; i<m; i++) {
-            p = new Point(i+1);
+            Point p = new Point(i);
             p.setDistinationFromPrevious(x, y);
             x = p.px; y = p.py;
-            if(i == m-1)
-                p.setSize(0.0);
             points.add(p);
         }
     }
@@ -156,19 +167,13 @@ class Things {
 
         float tt = t % 1;
 
-        for(int a=0; a<m; a++) {
-            
+        for (Point p : points) {
+            p.setPosByLerp(tt);
+
+            if(tt > 0.998){
+                p.setNextPos();
+            }
         }
-
-        float in_ = m*tt;
-        float in = floor(in_);
-        float interp = in_  - in;
-        int ind = int(in);
-
-        float xx = lerp(points.get(ind).dx, points.get(ind).px, interp);
-        float yy = lerp(points.get(ind).dy, points.get(ind).py, interp);
-
-        points.get(ind).setPos(xx, yy);
     }
 
     void showPoints() {
@@ -180,7 +185,6 @@ class Things {
 
 int m_ = 9;
 int m = int(sq(m_));
-int N = 30;
 
 Things things;
 
