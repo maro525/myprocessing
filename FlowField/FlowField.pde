@@ -1,3 +1,5 @@
+// http://beautifulprogramming.com/gestalt-dreams/
+
 boolean showsFPS = false;
 boolean showsField = false;
 PFont font;
