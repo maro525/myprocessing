@@ -1,6 +1,6 @@
 25::ms => dur T;
 100 => int N;     // 聴衆の人数
-.08 => float K;  // 秩序パラメータ：相互作用の強さ
+.05 => float K;  // 秩序パラメータ：相互作用の強さ
 K / N => float M;
 float phase[N];
 float freq[N];
@@ -9,6 +9,10 @@ int msg[N];
 "clap.wav" @=> string file;
 OscSend xmit;
 xmit.setHost("localhost", 1234);
+OscRecv recv;
+1234 => recv.port;
+recv.listen();
+recv.event("/kvalue, f") @=> OscEvent oe;
 
 SndBuf s[N];
 Pan2 p[N];
@@ -31,6 +35,13 @@ for (int i; i < N; i++) {
 }
 
 while (T => now) {
+    // oe => now;
+    // while (oe.nextMsg() != 0)
+    // {
+        // <<< "loop" >>>;
+        // oe.getFloat() => K;
+        // <<< "got (via OSC):", oe.getFloat() >>>;
+
     float sum;
     for (int i; i < N; i++) {
         0 => sum;
@@ -50,4 +61,5 @@ while (T => now) {
         }
         xmit.addInt(msg[i]);
     }
+    // }
 }

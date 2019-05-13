@@ -1,5 +1,7 @@
 // import processing.sound.*;
 import oscP5.*;
+import netP5.*;
+import controlP5.*;
 
 // ArrayList<Thing> things = new ArrayList<Thing>();
 ArrayList<Circle> things = new ArrayList<Circle>();
@@ -12,9 +14,17 @@ int N = (int)sq(N_);
 float size = 15.0;
 
 OscP5 oscP5;
+NetAddress remote;
 String address = "/clap";
 
 int receivePort = 1234;
+String sendIP = "127.0.0.1";
+int sendPort = 1234;
+String sendAddress = "/kvalue";
+
+ControlP5 cp5;
+Slider abc;
+float kvalue = 0.1;
 
 void setup() {
     size(1200, 600);
@@ -32,12 +42,28 @@ void setup() {
     frameRate(30);
 
     oscP5 = new OscP5(this, receivePort);
+    remote = new NetAddress(sendIP, sendPort);
 
     // clap = new SoundFile(this, "clap1.mp3");
+
+    cp5 = new ControlP5(this);
+    cp5.addSlider("kvalue")
+        .setPosition(700, 100)
+        .setSize(400, 20)
+        .setRange(0.001, 5.0)
+        .setNumberOfTickMarks(100);
+
+    cp5.getController("kvalue")
+        .getValueLabel()
+        .align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE)//位置、外側の右寄せ
+        .setPaddingX(-20);
 }
 
 void draw() {
+    sendmsg();
     background(10);
+    fill(100);
+    rect(600, 0, 600, 600);
     drawthings();
 }
 
@@ -75,4 +101,18 @@ void oscEvent(OscMessage message) {
             things.get(i).setStatus(m);
         }
     }
+}
+
+// void controlEvent(ControlEvent theEvent) {
+//     if (theEvent.getController().getName() == "kvalue") {
+//         OscMessage myMessage = new OscMessage(sendAddress);
+//         myMessage.add(kvalue);
+//         oscP5.send(myMessage, remote);
+//     }
+// }
+
+void sendmsg() {
+    OscMessage myMessage = new OscMessage(sendAddress);
+    myMessage.add(kvalue);
+    oscP5.send(myMessage, remote);
 }
